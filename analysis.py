@@ -1,6 +1,7 @@
 import pandas as pd
 import glob
 import os
+import warnings
 
 def load_csv_folder(folder_path, month_from_filename=True):
 
@@ -18,7 +19,10 @@ def load_csv_folder(folder_path, month_from_filename=True):
         df = pd.read_csv(f)
         if month_from_filename:
             name = os.path.splitext(os.path.basename(f))[0].lower()
-            df['month'] = month_map.get(name)
+            month = month_map.get(name)
+            if month is None:
+                warnings.warn(f"Unkown month in filename: '{name}'")
+            df['month'] = month
         df_list.append(df)
 
     return pd.concat(df_list, ignore_index=True)
@@ -31,19 +35,30 @@ def clean_sales(df):
 
     mask = (
         df[['price', 'quantity']].notna().all(axis=1)
-        & (df['price'] > 0)
-        &(df['quantity'] > 0)
+        & (df['price'] >= 0)
+        &(df['quantity'] >= 0)
         )
     return df[mask], df[~mask]
 
 def revenue_by_month(df):
+    df = df.copy()
+    df['revenue'] = df['price'] * df['quantity']
+    return df.groupby('month', dropna= False)['revenue'].sum()
 
 def revenue_by_product(df):
-    
+    df = df.copy()
+    df['revenue'] = df['price'] * df['quantity']
+    return df.groupby('product')['revenue'].sum()
 
 
-def main(df):
+def main():
 
-    #usage for clean_sales:
+    df = load_csv_folder("sample_data")
     good, bad = clean_sales(df)
     print(len(good),"good rows", len(bad),"bad rows" )
+    print(revenue_by_month(good))
+    print(revenue_by_product(good))
+    print(revenue_by_product(good).sum())
+
+if __name__ == "__main__":
+    main()
