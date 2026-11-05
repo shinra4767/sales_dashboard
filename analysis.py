@@ -23,3 +23,27 @@ def load_csv_folder(folder_path, month_from_filename=True):
 
     return pd.concat(df_list, ignore_index=True)
 
+def clean_sales(df):
+
+    df = df.copy()
+    df['price'] = pd.to_numeric(df['price'], errors='coerce')
+    df ['quantity'] = pd.to_numeric(df['quantity'], errors='coerce')
+
+    mask = (
+        df[['price', 'quantity']].notna().all(axis=1)
+        & (df['price'] > 0)
+        &(df['quantity'] > 0)
+        )
+    return df[mask], df[~mask]
+
+def revenue_by_month(df):
+
+def revenue_by_product(df):
+    
+
+
+def main(df):
+
+    #usage for clean_sales:
+    good, bad = clean_sales(df)
+    print(len(good),"good rows", len(bad),"bad rows" )
