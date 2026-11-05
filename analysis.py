@@ -2,13 +2,12 @@ import pandas as pd
 import glob
 import os
 import warnings
+month_map = {
+    'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+    'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
+}
 
 def load_csv_folder(folder_path, month_from_filename=True):
-
-    month_map = {
-        'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
-        'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
-    }
 
     all_files = glob.glob(os.path.join(folder_path, "*.csv"))
     if not all_files:
@@ -26,6 +25,15 @@ def load_csv_folder(folder_path, month_from_filename=True):
         df_list.append(df)
 
     return pd.concat(df_list, ignore_index=True)
+
+def read_one(source, name):
+    df = pd.read_csv(source)
+    stem = os.path.splitext(name)[0].lower()
+    month = month_map.get(stem)
+    if month is None:
+        warnings.warn(f"Unknown month in filename: '{name}'")
+    df ['month'] = month
+    return df
 
 def clean_sales(df):
 
