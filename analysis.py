@@ -58,6 +58,8 @@ def revenue_by_product(df):
     df['revenue'] = df['price'] * df['quantity']
     return df.groupby('product')['revenue'].sum()
 
+def filter_sales(df, products, months):
+    return df[df["product"].isin(products)& df["month"].isin(months)]
 
 def main():
 
