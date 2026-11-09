@@ -14,7 +14,7 @@ if files:
         try:
             dfs.append(read_one(f, f.name))
         except ValueError as e:
-            st.error(f"Skipped {f"Skipped {f.name}: {e}"}")
+            st.error(f"Skipped {f.name}: {e}")
 
     if not dfs:
         st.stop()
@@ -23,10 +23,9 @@ if files:
 
     good, bad = clean_sales(df)
     if good.empty:
-        st.errror("No usable rows found.")
+        st.error("No usable rows found.")
         st.stop()
 
-    st.metric("Total revenue", f"{good['price'].mul(good['quantity']).sum():.2f} €")
 
     with st.sidebar:
         st.header("Filters")
@@ -42,14 +41,15 @@ if files:
         st.warning("Nothing matches these filters")
         st.stop()
 
+    st.metric("Total revenue", f"{filtered['price'].mul(filtered['quantity']).sum():.2f}€")
+
     #2 
     st.subheader("Revenue by Month")
-    st.line_chart(revenue_by_month(good))
+    st.line_chart(revenue_by_month(filtered))
 
     #3
     st.subheader("Revenue by Product")
-    st.bar_chart(revenue_by_product(good))
-
+    st.bar_chart(revenue_by_product(filtered))
 
     if len(bad) > 0:
         st.warning(f"{len(bad)} rows could not be used")
@@ -60,8 +60,10 @@ if files:
         "Download cleaned data (CSV)",
         filtered.to_csv(index=False, sep=";", decimal=","),
         file_name="sales_clean.csv",
-        mime="text/csv,"
+        mime="text/csv"
     )
 
 else:
     st.info("Upload one or more CSV files to start")
+
+# py -m streamlit run app.py

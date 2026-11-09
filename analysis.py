@@ -6,6 +6,7 @@ month_map = {
     'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
     'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12
 }
+MONTH_LABELS = {number: f"{number:02d} {name}" for name, number in month_map.items()}
 
 def load_csv_folder(folder_path, month_from_filename=True):
 
@@ -51,7 +52,9 @@ def clean_sales(df):
 def revenue_by_month(df):
     df = df.copy()
     df['revenue'] = df['price'] * df['quantity']
-    return df.groupby('month', dropna= False)['revenue'].sum()
+    result = df.groupby('month', dropna =False)['revenue'].sum()
+    return result.rename(index=MONTH_LABELS)
+
 
 def revenue_by_product(df):
     df = df.copy()
