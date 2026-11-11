@@ -42,12 +42,16 @@ def clean_sales(df):
     df['price'] = pd.to_numeric(df['price'], errors='coerce')
     df ['quantity'] = pd.to_numeric(df['quantity'], errors='coerce')
 
-    mask = (
-        df[['price', 'quantity']].notna().all(axis=1)
-        & (df['price'] >= 0)
-        &(df['quantity'] >= 0)
-        )
-    return df[mask], df[~mask]
+    df['reason']= ''
+    df.loc[df['price'].isna(),'reason'] = 'price is not a number'
+    df.loc[df['quantity'].isna(), 'reason'] = 'quantity is missing or not a number'
+    df.loc[(df['price'] < 0), 'reason'] = 'negative price'
+    df.loc[(df['quantity'] < 0), 'reason'] = 'negative quantity'
+
+    bad_mask = df['reason'] != ''
+    good = df[~bad_mask].drop(columns='reason')
+    df['revenue']= df['price'] * df['quantity']
+    return good, df[bad_mask]
 
 def revenue_by_month(df):
     df = df.copy()

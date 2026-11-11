@@ -51,6 +51,10 @@ if files:
     st.subheader("Revenue by Product")
     st.bar_chart(revenue_by_product(filtered))
 
+    st.subheader("Errors and bad Files")
+    st.dataframe(bad)
+    st.write(bad['reason'].value_counts())
+
     if len(bad) > 0:
         st.warning(f"{len(bad)} rows could not be used")
         with st.expander("Show these rows"):
