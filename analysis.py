@@ -28,12 +28,19 @@ def load_csv_folder(folder_path, month_from_filename=True):
     return pd.concat(df_list, ignore_index=True)
 
 def read_one(source, name):
-    df = pd.read_csv(source)
+    df = pd.read_csv(source, sep=None, engine ="python", encoding="utf-8-sig")
     stem = os.path.splitext(name)[0].lower()
     month = month_map.get(stem)
     if month is None:
-        warnings.warn(f"Unknown month in filename: '{name}'")
-    df ['month'] = month
+        raise ValueError("filename must be a month (jan, feb, mar,...)")
+
+    required = {"product", "price", "quantity"}
+    missing = required - set(df.columns)
+    if missing:
+        raise ValueError(f"missing columns {sorted(missing)}")
+
+    df["month"] = month
+    df["source_file"] = name
     return df
 
 def clean_sales(df):
@@ -50,7 +57,7 @@ def clean_sales(df):
 
     bad_mask = df['reason'] != ''
     good = df[~bad_mask].drop(columns='reason')
-    df['revenue']= df['price'] * df['quantity']
+    good['revenue']= good['price'] * good['quantity']
     return good, df[bad_mask]
 
 def revenue_by_month(df):
